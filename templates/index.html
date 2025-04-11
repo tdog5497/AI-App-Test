@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Study Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container my-5">
+    <div class="text-center mb-5">
+      <h1 class="display-4">AI Study Assistant</h1>
+      <p class="lead">Upload your notes, generate summaries, and create flashcards</p>
+    </div>
 
+    <!-- Upload Section -->
+    <section class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h2 class="h5 mb-0">Upload Your Notes</h2>
+      </div>
+      <div class="card-body">
+        <input type="file" class="form-control mb-3" disabled />
+        <p class="text-muted mb-0">Uploads are disabled in this demo.</p>
+      </div>
+    </section>
+
+    <!-- Summary Section -->
+    <section class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h2 class="h5 mb-0">Generate Summary</h2>
+      </div>
+      <div class="card-body">
+        <button class="btn btn-success" onclick="showSummary()">Generate Summary</button>
+        <div id="summary-box" class="alert alert-success mt-3 d-none">
+          <p><strong>Summary:</strong> This is a sample summary of your notes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flashcards Section -->
+    <section class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h2 class="h5 mb-0">Flashcards</h2>
+      </div>
+      <div class="card-body">
+        <button class="btn btn-info" onclick="showFlashcards()">Show Flashcards</button>
+        <ul id="flashcard-list" class="list-group mt-3 d-none">
+          <li class="list-group-item">Q1: What is an AI model?</li>
+          <li class="list-group-item">Q2: Define machine learning.</li>
+          <li class="list-group-item">Q3: Difference between supervised and unsupervised learning?</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-muted mt-5 small">
+      &copy; 2025 AI Study Assistant — Demo for GitHub Pages
+    </footer>
+  </div>
+
+  <script>
+    function showSummary() {
+      document.getElementById("summary-box").classList.remove("d-none");
+    }
+    function showFlashcards() {
+      document.getElementById("flashcard-list").classList.remove("d-none");
+    }
+  </script>
+</body>
+</html>
