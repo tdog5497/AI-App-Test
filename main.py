@@ -4,7 +4,7 @@ import fitz  # PyMuPDF
 import os
 
 app = Flask(__name__)
-client = OpenAI()  # Reads OPENAI_API_KEY from the environment
+client = OpenAI()  # Uses OPENAI_API_KEY from environment
 
 @app.route('/')
 def home():
@@ -17,16 +17,23 @@ def upload():
         return jsonify({'error': 'No file uploaded'}), 400
 
     try:
-        # Read text from uploaded PDF
+        # Extract text from PDF
         doc = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         for page in doc:
             text += page.get_text()
 
-        # Prompt to generate flashcards
-        prompt = f"Create 10 flashcards based on the following study material:\n\n{text[:3000]}"
+        # Format: Question: Answer
+        prompt = (
+            "Generate 10 flashcards based on the following study material. "
+            "Format each flashcard on a new line with the question and answer separated by a colon. "
+            "Example: What is the capital of France?: Paris\n\n"
+            f"{text[:3000]}"
+        )
 
-        # Use gpt-3.5-turbo (universally available)
+        print("PROMPT SENT TO OPENAI:\n", prompt)  # optional log for debugging
+
+        # Call OpenAI API
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
