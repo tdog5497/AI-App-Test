@@ -1,252 +1,53 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="row mb-5">
-    <div class="col-md-12 text-center">
-        <h1 class="display-4 mb-3">AI Study Assistant</h1>
-        <p class="lead">Upload your study notes, generate summaries, create flashcards, and get answers to your questions</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Study Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Bootstrap CDN for styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <h1 class="display-4">AI Study Assistant</h1>
+      <p class="lead">Upload your notes, create flashcards, and generate summaries — all powered by AI.</p>
     </div>
-</div>
 
-{% if openai_api_status != "valid" %}
-<div class="alert alert-warning mb-4" role="alert">
-    <div class="d-flex align-items-center">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <div>
-            <h4 class="alert-heading">OpenAI API Status: {{ openai_api_status }}</h4>
-            <p class="mb-0">{{ openai_error_message }}</p>
-            <hr>
-            <p class="mb-0">
-                AI features may not work correctly. 
-                {% if openai_api_status == "rate_limited" %}
-                The OpenAI API quota has been exceeded. Please try again later or use a different API key.
-                {% elif openai_api_status == "invalid" %}
-                Please check your OpenAI API key configuration.
-                {% else %}
-                Please check your API connection and configuration.
-                {% endif %}
-            </p>
-            
-            <!-- API Key Update Form -->
-            <div class="mt-3">
-                <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#apiKeyForm">
-                    <i class="fas fa-key me-1"></i> Update API Key
-                </button>
-                <div class="collapse mt-3" id="apiKeyForm">
-                    <div class="card card-body bg-dark">
-                        <form id="update-api-key-form">
-                            <div class="mb-3">
-                                <label for="api-key-input" class="form-label">Enter your OpenAI API Key:</label>
-                                <input type="password" class="form-control" id="api-key-input" placeholder="sk-..." required>
-                                <div class="form-text">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Dashboard</a></div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Update API Key</button>
-                            <div id="api-key-update-result" class="mt-2"></div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+    <section id="upload-section" class="mb-5">
+      <h2>Upload Your Study Material</h2>
+      <input type="file" class="form-control mb-3" disabled />
+      <p class="text-muted">This is a demo — uploads are disabled.</p>
+    </section>
 
-<!-- Upload Section -->
-<section id="upload-section" class="mb-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary bg-opacity-75">
-            <h2 class="h4 mb-0">
-                <i class="fas fa-upload me-2"></i>Upload Your Study Material
-            </h2>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <h3 class="h5">Upload PDF</h3>
-                        <!-- Simple form with direct form submission -->
-                        <form id="pdf-upload-form" class="mb-3" enctype="multipart/form-data" action="/upload" method="post">
-                            <div class="mb-3">
-                                <input type="file" class="form-control" id="pdf-file" name="file" accept=".pdf" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-file-pdf me-1"></i> Upload PDF
-                            </button>
-                        </form>
-                        <!-- Alternative direct upload form -->
-                        <div class="mt-3">
-                            <p class="small text-muted">If the upload above doesn't work, try this alternative:</p>
-                            <form action="/simple-upload" method="post" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <input type="file" class="form-control" name="file" accept=".pdf" required>
-                                </div>
-                                <button type="submit" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-upload me-1"></i> Alternative Upload
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <h3 class="h5">Paste Text</h3>
-                        <form id="text-upload-form">
-                            <div class="mb-3">
-                                <textarea class="form-control" id="text-content" name="text_content" rows="5" placeholder="Paste your notes here..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paste me-1"></i> Process Text
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <div id="upload-result" class="d-none">
-                    <h3 class="h5">Uploaded Content:</h3>
-                    <div class="alert alert-success">
-                        <p class="mb-0">Your content has been successfully uploaded!</p>
-                    </div>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <pre id="uploaded-text" class="text-wrap" style="max-height: 300px; overflow-y: auto;"></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+    <section id="summary-section" class="mb-5">
+      <h2>Summary Generator</h2>
+      <button class="btn btn-success mb-3" onclick="showSummary()">Generate Summary</button>
+      <div id="summary-box" class="alert alert-success d-none">
+        <p><strong>Summary:</strong> This is a sample summary of your study notes.</p>
+      </div>
+    </section>
 
-<!-- Summary Section -->
-<section id="summary-section" class="mb-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-success bg-opacity-75">
-            <h2 class="h4 mb-0">
-                <i class="fas fa-file-alt me-2"></i>Generate Summary
-            </h2>
-        </div>
-        <div class="card-body">
-            <p>Generate a concise summary of your notes to help with revision.</p>
-            <button id="generate-summary-btn" class="btn btn-success mb-4" disabled>
-                <i class="fas fa-magic me-1"></i> Generate Summary
-            </button>
-            
-            <div id="summary-result" class="d-none">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h3 class="h5 mb-0">Generated Summary:</h3>
-                    <button id="copy-summary-btn" class="btn btn-sm btn-outline-light">
-                        <i class="fas fa-copy me-1"></i> Copy
-                    </button>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <div id="summary-content" class="summary-text"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="summary-loading" class="text-center d-none">
-                <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Generating summary... This might take a moment.</p>
-            </div>
-        </div>
-    </div>
-</section>
+    <section id="flashcards-section">
+      <h2>Flashcards</h2>
+      <button class="btn btn-info mb-3" onclick="showFlashcards()">Show Flashcards</button>
+      <ul id="flashcard-list" class="list-group d-none">
+        <li class="list-group-item">Q1: What is an AI model?</li>
+        <li class="list-group-item">Q2: Define machine learning.</li>
+        <li class="list-group-item">Q3: What is the difference between supervised and unsupervised learning?</li>
+      </ul>
+    </section>
+  </div>
 
-<!-- Flashcards Section -->
-<section id="flashcards-section" class="mb-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-info bg-opacity-75">
-            <h2 class="h4 mb-0">
-                <i class="fas fa-clipboard-list me-2"></i>Generate Flashcards
-            </h2>
-        </div>
-        <div class="card-body">
-            <p>Create flashcards to test your knowledge and reinforce learning.</p>
-            <button id="generate-flashcards-btn" class="btn btn-info mb-4" disabled>
-                <i class="fas fa-magic me-1"></i> Generate Flashcards
-            </button>
-            
-            <div id="flashcards-result" class="d-none">
-                <h3 class="h5 mb-3">Generated Flashcards:</h3>
-                <div id="flashcards-container" class="row"></div>
-                
-                <div class="mt-4 text-center">
-                    <button id="prev-card-btn" class="btn btn-sm btn-outline-secondary" disabled>
-                        <i class="fas fa-chevron-left"></i> Previous
-                    </button>
-                    <span id="card-pagination" class="mx-3">Card 1 of 10</span>
-                    <button id="next-card-btn" class="btn btn-sm btn-outline-secondary">
-                        Next <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div id="flashcards-loading" class="text-center d-none">
-                <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Generating flashcards... This might take a moment.</p>
-            </div>
-        </div>
-    </div>
-</section>
+  <script>
+    function showSummary() {
+      document.getElementById("summary-box").classList.remove("d-none");
+    }
+    function showFlashcards() {
+      document.getElementById("flashcard-list").classList.remove("d-none");
+    }
+  </script>
+</body>
+</html>
 
-<!-- Chatbot Section -->
-<section id="chatbot-section" class="mb-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-warning bg-opacity-75">
-            <h2 class="h4 mb-0">
-                <i class="fas fa-comments me-2"></i>Ask Questions
-            </h2>
-        </div>
-        <div class="card-body">
-            <p>Ask study-related questions to deepen your understanding.</p>
-            
-            <form id="question-form">
-                <div class="mb-3">
-                    <label for="question-input" class="form-label">Your Question:</label>
-                    <input type="text" class="form-control" id="question-input" placeholder="Ask something about your notes..." required>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="use-context-check" checked>
-                    <label class="form-check-label" for="use-context-check">Use my uploaded notes as context</label>
-                </div>
-                <button type="submit" class="btn btn-warning" id="ask-question-btn" disabled>
-                    <i class="fas fa-paper-plane me-1"></i> Ask Question
-                </button>
-            </form>
-            
-            <div id="chat-history" class="mt-4 d-none">
-                <h3 class="h5 mb-3">Chat History:</h3>
-                <div id="chat-messages" class="chat-container"></div>
-            </div>
-            
-            <div id="question-loading" class="text-center mt-4 d-none">
-                <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Thinking about your question...</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Error Alert -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="error-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-danger text-white">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <strong class="me-auto">Error</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="error-message">
-            Something went wrong.
-        </div>
-    </div>
-</div>
-{% endblock %}
