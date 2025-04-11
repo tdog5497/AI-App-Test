@@ -1,12 +1,10 @@
 from flask import Flask, render_template, request, jsonify
-import openai
+from openai import OpenAI
 import fitz  # PyMuPDF
 import os
 
 app = Flask(__name__)
-
-# Get your OpenAI API key from environment variable (set this in Render)
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI()  # OpenAI key is read automatically from OPENAI_API_KEY env variable
 
 @app.route('/')
 def home():
@@ -19,17 +17,16 @@ def upload():
         return jsonify({'error': 'No file uploaded'}), 400
 
     try:
-        # Read the PDF file content
+        # Read text from uploaded PDF
         doc = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         for page in doc:
             text += page.get_text()
 
-        # Prepare the prompt for OpenAI
         prompt = f"Generate 10 flashcards based on the following study material:\n\n{text[:3000]}"
 
-        # Call OpenAI GPT-4
-        response = openai.ChatCompletion.create(
+        # Call OpenAI ChatCompletion using new SDK syntax
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "user", "content": prompt}
@@ -37,13 +34,12 @@ def upload():
             temperature=0.7
         )
 
-        flashcards = response['choices'][0]['message']['content']
+        flashcards = response.choices[0].message.content
         return jsonify({'flashcards': flashcards})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Required for Render – binds to 0.0.0.0 and uses the PORT env var
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
