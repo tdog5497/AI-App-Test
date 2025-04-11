@@ -4,7 +4,7 @@ import fitz  # PyMuPDF
 import os
 
 app = Flask(__name__)
-client = OpenAI()  # OpenAI key is read automatically from OPENAI_API_KEY env variable
+client = OpenAI()  # Reads OPENAI_API_KEY from the environment
 
 @app.route('/')
 def home():
@@ -23,11 +23,12 @@ def upload():
         for page in doc:
             text += page.get_text()
 
-        prompt = f"Generate 10 flashcards based on the following study material:\n\n{text[:3000]}"
+        # Prompt to generate flashcards
+        prompt = f"Create 10 flashcards based on the following study material:\n\n{text[:3000]}"
 
-        # Call OpenAI ChatCompletion using new SDK syntax
+        # Use gpt-3.5-turbo (universally available)
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt}
             ],
