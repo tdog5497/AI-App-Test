@@ -3,8 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <title>AI Study Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .flashcard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .flashcard {
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .flashcard:hover .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .card-front {
+      background-color: #ffffff;
+      color: #333;
+      border: 2px solid #007bff;
+    }
+
+    .card-back {
+      background-color: #007bff;
+      color: white;
+      transform: rotateY(180deg);
+    }
+  </style>
 </head>
 <body>
   <div class="container py-5">
@@ -22,11 +77,11 @@
     <!-- Output Section -->
     <div id="output" class="mt-5">
       <h3 class="mb-3">Flashcards</h3>
-      <pre id="flashcards" class="bg-light p-3 rounded" style="white-space: pre-wrap;"></pre>
+      <div id="flashcards" class="flashcard-grid"></div>
     </div>
   </div>
 
-  <!-- JavaScript to Handle Upload -->
+  <!-- JavaScript to handle upload and display flip cards -->
   <script>
     const form = document.getElementById('upload-form');
     const output = document.getElementById('flashcards');
@@ -34,7 +89,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
-      output.textContent = "Generating flashcards... please wait.";
+      output.innerHTML = "<p>Generating flashcards... please wait.</p>";
 
       try {
         const res = await fetch('/upload', {
@@ -44,12 +99,27 @@
 
         const data = await res.json();
         if (data.flashcards) {
-          output.textContent = data.flashcards;
+          output.innerHTML = ''; // clear previous
+          const lines = data.flashcards.split('\n');
+          lines.forEach(line => {
+            const [q, a] = line.split(':');
+            if (q && a) {
+              const card = document.createElement('div');
+              card.className = 'flashcard';
+              card.innerHTML = `
+                <div class="card-inner">
+                  <div class="card-front">${q.trim()}</div>
+                  <div class="card-back">${a.trim()}</div>
+                </div>
+              `;
+              output.appendChild(card);
+            }
+          });
         } else {
-          output.textContent = "Error: " + data.error;
+          output.innerHTML = `<p class="text-danger">Error: ${data.error}</p>`;
         }
       } catch (err) {
-        output.textContent = "Error: " + err.message;
+        output.innerHTML = `<p class="text-danger">Error: ${err.message}</p>`;
       }
     });
   </script>
