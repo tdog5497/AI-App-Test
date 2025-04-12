@@ -13,11 +13,9 @@
       gap: 20px;
       margin-top: 20px;
     }
-
     .flashcard {
       perspective: 1000px;
     }
-
     .card-inner {
       position: relative;
       width: 100%;
@@ -29,11 +27,9 @@
       border-radius: 10px;
       cursor: pointer;
     }
-
     .flashcard:hover .card-inner {
       transform: rotateY(180deg);
     }
-
     .card-front, .card-back {
       position: absolute;
       width: 100%;
@@ -47,13 +43,11 @@
       font-weight: bold;
       font-size: 1.1rem;
     }
-
     .card-front {
       background-color: #ffffff;
       color: #333;
       border: 2px solid #007bff;
     }
-
     .card-back {
       background-color: #007bff;
       color: white;
@@ -67,6 +61,10 @@
 
     <!-- Upload Form -->
     <form id="upload-form" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="set-name" class="form-label">Flashcard Set Name:</label>
+        <input type="text" class="form-control" name="setName" id="set-name" placeholder="e.g. Contracts - Consideration" required />
+      </div>
       <div class="mb-3">
         <label for="pdf" class="form-label">Upload Your Study Notes (PDF):</label>
         <input type="file" class="form-control" name="pdf" accept=".pdf" required />
@@ -100,20 +98,16 @@
         const data = await res.json();
         if (data.flashcards) {
           output.innerHTML = ''; // clear previous
-          const lines = data.flashcards.split('\n');
-          lines.forEach(line => {
-            const [q, a] = line.split(':');
-            if (q && a) {
-              const card = document.createElement('div');
-              card.className = 'flashcard';
-              card.innerHTML = `
-                <div class="card-inner">
-                  <div class="card-front">${q.trim()}</div>
-                  <div class="card-back">${a.trim()}</div>
-                </div>
-              `;
-              output.appendChild(card);
-            }
+          data.flashcards.forEach(card => {
+            const flashcard = document.createElement('div');
+            flashcard.className = 'flashcard';
+            flashcard.innerHTML = `
+              <div class="card-inner">
+                <div class="card-front">${card.question}</div>
+                <div class="card-back">${card.answer}</div>
+              </div>
+            `;
+            output.appendChild(flashcard);
           });
         } else {
           output.innerHTML = `<p class="text-danger">Error: ${data.error}</p>`;
