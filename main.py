@@ -31,13 +31,11 @@ def upload():
         return jsonify({'error': 'No file uploaded'}), 400
 
     try:
-        # Extract all text from the PDF
         doc = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         for page in doc:
             text += page.get_text()
 
-        # Chunk the text into ~3000 character blocks
         chunks = [text[i:i+3000] for i in range(0, len(text), 3000)]
         all_flashcards = []
 
@@ -70,7 +68,6 @@ def upload():
                 if len(all_flashcards) >= 300:
                     break
 
-        # Save to JSON file
         safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', set_name)
         file_path = os.path.join(DATA_FOLDER, f"{safe_name}.json")
 
@@ -82,7 +79,7 @@ def upload():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Route to list all saved sets
+# ✅ List all flashcard sets
 @app.route('/sets')
 def list_sets():
     sets = []
@@ -91,9 +88,9 @@ def list_sets():
             sets.append(filename.replace('.json', ''))
     return render_template('sets.html', sets=sets)
 
-# Route to display an individual set (renamed to avoid conflict)
+# ✅ View a specific flashcard set
 @app.route('/sets/<set_name>')
-def display_set(set_name):
+def view_set(set_name):
     file_path = os.path.join(DATA_FOLDER, f"{set_name}.json")
     if not os.path.exists(file_path):
         return "Flashcard set not found", 404
