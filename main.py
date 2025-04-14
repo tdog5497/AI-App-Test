@@ -82,8 +82,8 @@ def upload():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/sets')
-def list_sets():
+@app.route('/sets/<set_name>')
+def get_set(set_name):
     sets = []
     for filename in os.listdir(DATA_FOLDER):
         if filename.endswith('.json'):
