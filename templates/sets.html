@@ -1,1 +1,30 @@
+<!-- templates/sets.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Saved Flashcard Sets</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="mb-4">📂 Saved Flashcard Sets</h1>
+
+    {% if sets %}
+      <ul class="list-group">
+        {% for set in sets %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ set }}</strong>
+            <a class="btn btn-sm btn-primary" href="/sets/{{ set }}">View</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="alert alert-info">No flashcard sets saved yet.</div>
+    {% endif %}
+
+    <a href="/" class="btn btn-link mt-4">← Back to Home</a>
+  </div>
+</body>
+</html>
 
