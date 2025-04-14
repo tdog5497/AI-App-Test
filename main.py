@@ -31,7 +31,7 @@ def upload():
         return jsonify({'error': 'No file uploaded'}), 400
 
     try:
-        # Extract text from uploaded PDF
+        # Extract all text from the PDF
         doc = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         for page in doc:
@@ -70,7 +70,7 @@ def upload():
                 if len(all_flashcards) >= 300:
                     break
 
-        # Save to JSON file
+        # Save flashcards to JSON file
         safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', set_name)
         file_path = os.path.join(DATA_FOLDER, f"{safe_name}.json")
 
@@ -82,8 +82,8 @@ def upload():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/sets/<set_name>')
-def get_set(set_name):
+@app.route('/sets')
+def list_sets():
     sets = []
     for filename in os.listdir(DATA_FOLDER):
         if filename.endswith('.json'):
