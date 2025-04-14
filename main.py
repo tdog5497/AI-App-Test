@@ -70,7 +70,7 @@ def upload():
                 if len(all_flashcards) >= 300:
                     break
 
-        # Save flashcards to JSON file
+        # Save to JSON file
         safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', set_name)
         file_path = os.path.join(DATA_FOLDER, f"{safe_name}.json")
 
@@ -82,6 +82,7 @@ def upload():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ✅ Route for viewing all saved sets
 @app.route('/sets')
 def list_sets():
     sets = []
@@ -90,6 +91,7 @@ def list_sets():
             sets.append(filename.replace('.json', ''))
     return render_template('sets.html', sets=sets)
 
+# ✅ Route for viewing one saved flashcard set
 @app.route('/sets/<set_name>')
 def get_set(set_name):
     file_path = os.path.join(DATA_FOLDER, f"{set_name}.json")
