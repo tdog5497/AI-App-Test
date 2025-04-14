@@ -82,7 +82,7 @@ def upload():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ✅ Route for viewing all saved sets
+# Route to list all saved sets
 @app.route('/sets')
 def list_sets():
     sets = []
@@ -91,9 +91,9 @@ def list_sets():
             sets.append(filename.replace('.json', ''))
     return render_template('sets.html', sets=sets)
 
-# ✅ Route for viewing one saved flashcard set
+# Route to display an individual set (renamed to avoid conflict)
 @app.route('/sets/<set_name>')
-def get_set(set_name):
+def display_set(set_name):
     file_path = os.path.join(DATA_FOLDER, f"{set_name}.json")
     if not os.path.exists(file_path):
         return "Flashcard set not found", 404
