@@ -11,12 +11,11 @@ client = OpenAI()
 DATA_FOLDER = "data"
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
-# 🔧 You can tweak this prompt anytime
+# Prompt for ChatGPT
 prompt_template = (
     "You're a legal tutor helping a student prepare for law school exams. "
-    "Generate useful flashcards from the following outline. Each flashcard should be on one line, "
-    "formatted like: Question: Answer. Focus on exam-relevant rules, doctrines, and distinctions. "
-    "Avoid general or filler info. Begin:\n\n{}"
+    "Generate useful flashcards from the following outline. Format them as:\n"
+    "Question: ...\nAnswer: ...\n\nOnly include flashcards that would be helpful for reviewing this material.\n\n{}"
 )
 
 @app.route('/')
@@ -38,13 +37,13 @@ def upload():
         for page in doc:
             text += page.get_text()
 
-        # Chunk the text into ~3000 character segments
+        # Chunk the text into ~3000 character blocks
         chunks = [text[i:i+3000] for i in range(0, len(text), 3000)]
         all_flashcards = []
 
         for chunk in chunks:
             if len(all_flashcards) >= 300:
-                break  # limit total output to 300 cards
+                break
 
             prompt = prompt_template.format(chunk)
             response = client.chat.completions.create(
@@ -54,15 +53,24 @@ def upload():
             )
 
             lines = response.choices[0].message.content.strip().split('\n')
-            for line in lines:
-                if ':' in line and len(all_flashcards) < 300:
-                    q, a = line.split(':', 1)
-                    all_flashcards.append({
-                        "question": q.strip(),
-                        "answer": a.strip()
-                    })
+            current_question = None
 
-        # Save flashcards to JSON file
+            for line in lines:
+                line = line.strip()
+                if line.lower().startswith("question:"):
+                    current_question = line.split(":", 1)[1].strip()
+                elif line.lower().startswith("answer:") and current_question:
+                    answer = line.split(":", 1)[1].strip()
+                    all_flashcards.append({
+                        "question": current_question,
+                        "answer": answer
+                    })
+                    current_question = None
+
+                if len(all_flashcards) >= 300:
+                    break
+
+        # Save to JSON file
         safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', set_name)
         file_path = os.path.join(DATA_FOLDER, f"{safe_name}.json")
 
