@@ -1,1 +1,85 @@
+<!-- templates/flashcards.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ set_name }} – Flashcards</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .flashcard-row {
+      margin-bottom: 20px;
+    }
+    .question-box {
+      background-color: #007bff;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #007bff;
+    }
+    .flip-card {
+      perspective: 1000px;
+      height: 100%;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+    .flip-card:hover .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      padding: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flip-card-front {
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    .flip-card-back {
+      background-color: #007bff;
+      color: white;
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="text-center mb-4">📘 {{ set_name }}</h1>
+    <a href="/sets" class="btn btn-secondary mb-4">← Back to Saved Sets</a>
+
+    {% for card in flashcards %}
+      <div class="row flashcard-row">
+        <div class="col-md-6">
+          <div class="question-box h-100">{{ card.question }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="flip-card h-100">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">Hover to Reveal</div>
+              <div class="flip-card-back">{{ card.answer }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>
 
