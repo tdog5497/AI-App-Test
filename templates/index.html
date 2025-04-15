@@ -1,51 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>AI Study Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- ✅ this loads the correct stylesheet -->
-</head>
-<body>
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(form);
+  flashcardContainer.innerHTML = "<p>Generating flashcards... please wait.</p>";
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="/">AI Study Assistant</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/sets">📂 Saved Flashcard Sets</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  try {
+    const res = await fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
 
-  <!-- Main Content -->
-  <div class="container py-5">
-    <h1 class="text-center mb-4">📘 AI Study Assistant</h1>
+    const data = await res.json();
+    if (data.flashcards) {
+      flashcardContainer.innerHTML = '';
 
-    <!-- Instructions -->
-    <div class="alert alert-info text-center" role="alert">
-      <p class="mb-1"><strong>What does this app do?</strong> This tool generates flashcards from your study notes using AI – perfect for law school revision and exam prep.</p>
-      <p class="mb-0"><strong>Instructions:</strong> First name your flashcard set, then upload your PDF file, and click "Generate Flashcards". You’ll instantly get a complete set of AI-generated flip cards to help you study!</p>
-    </div>
+      data.flashcards.forEach((card) => {
+        const row = document.createElement('div');
+        row.className = 'row mb-4';
 
-    <!-- Upload Form -->
-    <form id="upload-form" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="set-name" class="form-label">Flashcard Set Name:</label>
-        <input type="text" class="form-control" name="setName" id="set-name" placeholder="e.g. Crim Pro - Fourth Amendment" required />
-      </div>
-      <div class="mb-3">
-        <label for="pdf" class="form-label">Upload Your Study Notes (PDF):</label>
-        <input type="file" class="form-control" name="pdf" accept=".pdf" required />
-      </div>
-      <button type="submit" class="btn btn-primary">Generate Flashcards</button>
-    </form>
+        const questionCol = document.createElement('div');
+        questionCol.className = 'col-md-6';
+        questionCol.innerHTML = `
+          <div class="question-box h-100">${card.question}</div>
+        `;
 
-    <!-- Flashcard Output -->
-    <div id="output" class="mt-5">
-      <h3 class="mb-3">Flash
+        const answerCol = document.createElement('div');
+        answerCol.className = 'col-md-6';
+        answerCol.innerHTML = `
+          <div class="flip-card h-100">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">Hover to Reveal</div>
+              <div class="flip-card-back">${card.answer}</div>
+            </div>
+          </div>
+        `;
+
+        row.appendChild(questionCol);
+        row.appendChild(answerCol);
+        flashcardContainer.appendChild(row);
+      });
+
+    } else {
+      flashcardContainer.innerHTML = `<p class="text-danger">Error: ${data.error}</p>`;
+    }
+  } catch (err) {
+    flashcardContainer.innerHTML = `<p class="text-danger">Error: ${err.message}</p>`;
+  }
+});
